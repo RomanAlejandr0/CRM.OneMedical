@@ -1,0 +1,361 @@
+﻿@page "/consultas"
+
+@using System.Globalization;
+
+
+@inject AuthenticationStateProvider auth
+@inject IManager manager
+@inject IJSRuntime js
+
+@attribute [Authorize(Roles = "Consultas")]
+
+
+<h5 class="border-start border-2 ps-1">Ver mis consultas pendiente o Agendar una</h5>
+
+@if (usuario.Perfil == (short)PerfilesUsuarios.Paciente)
+{
+    <RadzenButton ButtonType="ButtonType.Button" Text="Nueva Cita" ButtonStyle="ButtonStyle.Primary" Click="(() => NuevaCita = true)" class="mt-3" />
+}
+
+@if (Citas == null)
+{
+    <p>Cargando...</p>
+}
+else if (Citas.Count == 0)
+{
+    <p>No hay citas registradas...</p>
+}
+else
+{
+    <table class="table table-sm table-bordered table-hover mt-3 caption-top">
+        <caption>Mis Citas</caption>
+        <thead>
+            <tr class="table-primary text-center align-middle">
+
+                @if (usuario.Perfil == (short)PerfilesUsuarios.Paciente)
+                {
+                    <th scope="col" class="py-2">Doctor</th>
+                    <th scope="col">Telefono</th>
+                }
+                else if (usuario.Perfil == (short)PerfilesUsuarios.Medico)
+                {
+                    <th scope="col" class="py-2">Paciente</th>
+                    <th scope="col">Telefono</th>
+                }
+
+                <th scope="col">Sucursal</th>
+                <th scope="col">Descripcion</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Hora Inicio</th>
+                <th scope="col">Hora Fin</th>
+                <th scope="col">Estatus</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cita in Citas)
+            {
+                <tr>
+
+                    @if (usuario.Perfil == (short)PerfilesUsuarios.Paciente)
+                    {
+                        <th scope="row">@cita.DoctorNombre</th>
+                        <td>@cita.NumeroTelefonoDoctor</td>
+                    }
+                    else if (usuario.Perfil == (short)PerfilesUsuarios.Medico)
+                    {
+                        <th scope="row">@cita.PacienteNombre</th>
+                        <td>@cita.NumeroTelefonoPaciente</td>
+                    }
+                    <td>Azcapotzalco</td>
+                    <td>
+                        @if (usuario.Perfil == (short)PerfilesUsuarios.Medico)
+                        {
+                            @if (cita.Descripcion == null)
+                            {
+                                <RadzenButton ButtonType="ButtonType.Button" Text="Agregar Descripcion" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.ExtraSmall" />
+                            }
+                            else
+                            {
+                                @cita.Descripcion
+                            }
+                        }
+                        else if (usuario.Perfil == (short)PerfilesUsuarios.Paciente)
+                        {
+                            if (cita.Descripcion != null)
+                            {
+
+                                @cita.Descripcion
+                            }
+                            else if (cita.Descripcion == null)
+                            {
+                                <text>Sin descripcion</text>
+                            }
+                        }
+                    </td>
+                    <td>@cita.FechaCita.Date</td>
+                    <td>@cita.HoraInicio</td>
+                    <td>@cita.HoraFin</td>
+                    <td>@cita.Estatus</td>
+                    <td>
+                        <RadzenButton ButtonType="ButtonType.Button" Text="Ver Detalles" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (usuario.Perfil == (short)PerfilesUsuarios.Paciente)
+{
+    @if (NuevaCita)
+    {
+        <RadzenTemplateForm TItem="Usuario" Data="@usuario" Submit="GuardarCita">
+            <RadzenFieldset Text="Sintomas">
+                <div class="row">
+                    <div class="col-md-4 align-items-center d-flex">
+                        <RadzenLabel Text="1. ¿Cuándo comenzaron los síntomas?" />
+                    </div>
+                    <div class="col-md-8">
+                        <RadzenTextBox style="width: 100%;" @bind-Value="@usuario.SintomasDelPaciente.InicioDeLosSintomas" Name="SintomasPrincipales" />
+                        <RadzenRequiredValidator Component="SintomasPrincipales" Text="Campo requerido!" Popup="true" />
+                    </div>
+                </div>
+
+                <br />
+
+                <div class="row">
+                    <div class="col-md-4 align-items-center d-flex">
+                        <RadzenLabel Text="2. ¿Cuáles son sus síntomas principales?" />
+                    </div>
+                    <div class="col-md-8">
+                        <RadzenTextBox style="width: 100%;" @bind-Value="@usuario.SintomasDelPaciente.SintomasPrincipales" Name="SintomasPrincipales" />
+                        <RadzenRequiredValidator Component="SintomasPrincipales" Text="Campo requerido!" Popup="true" />
+                    </div>
+                </div>
+
+                <br />
+
+                <div class="row">
+                    <div class="col-md-4 align-items-center d-flex">
+                        <RadzenLabel Text="3. ¿Cómo comenzó?" />
+                    </div>
+                    <div class="col-md-8">
+                        <RadzenTextBox style="width: 100%;" @bind-Value="@usuario.SintomasDelPaciente.ComoEmpezo" Name="ComoEmpezo" />
+                        <RadzenRequiredValidator Component="ComoEmpezo" Text="Campo requerido!" Popup="true" />
+                    </div>
+                </div>
+
+                <br />
+
+                <div class="row">
+                    <div class="col-md-4 align-items-center d-flex">
+                        <RadzenLabel Text="4. ¿Cómo ha evolucionado hasta la fecha?" />
+                    </div>
+                    <div class="col-md-8">
+                        <RadzenTextBox style="width: 100%;" @bind-Value="@usuario.SintomasDelPaciente.ComoEvoluciono" Name="ComoEvoluciono" />
+                        <RadzenRequiredValidator Component="ComoEvoluciono" Text="Campo requerido!" Popup="true" />
+                    </div>
+                </div>
+            </RadzenFieldset>
+
+            <br />
+            <RadzenButton ButtonType="ButtonType.Button" Text="Buscar Doctores Disponibles" ButtonStyle="ButtonStyle.Info" Click="BuscarDoctores" />
+
+            <table class="table table-bordered mt-3 caption-top">
+                <caption>Doctores</caption>
+                <thead>
+                    <tr class="table-primary">
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Apellidos</th>
+                        <th scope="col">Telefono</th>
+                        <th scope="col">Email</th>
+                        <th scope="col" colspan="2">Horarios Disponibles</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doctor in Doctores)
+                    {
+                        <tr>
+                            <th scope="row">@doctor.Nombre</th>
+                            <td>@doctor.Apellidos</td>
+                            <td>@doctor.Telefono</td>
+                            <td>@doctor.EMail</td>
+                            <td>
+                                <input type="date" class="form-control" @bind-value="usuario.Cita.FechaCita" min="@usuario.Cita.FechaCita"  />
+                            </td>
+                            <td>
+                                <select class="form-select" aria-label="Default select example" @onchange="SeleccionFechaInicioCita">
+                                    <option selected value="0">Selecciona una hora</option>
+
+                                    @foreach (var hora in doctor.HorariosDeConsulta.Where(x => x.EstaOcupado == false))
+                                    {
+                                        <option value="@hora.HoraInicioCita">@($"{hora.HoraInicioCita} - {hora.HoraFinCita}")</option>
+
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <button type="submit" class="btn btn-primary" @onclick="(() => GuardarCita(doctor))">
+                                    Agendar
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td scope="row" colspan="5"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </RadzenTemplateForm>
+    }
+}
+
+
+@code {
+    private long usuarioId = new long();
+
+    public Usuario usuario = new Usuario() { SintomasDelPaciente = new SintomasDelPaciente() };
+
+    private bool VerHorariosDisponibles = false;
+    private bool NuevaCita = false;
+
+
+    private List<Tbl_Citas> Citas = new List<Tbl_Citas>();
+
+
+    private List<Usuario> Doctores = new List<Usuario>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarioId = long.Parse((await auth.GetAuthenticationStateAsync()).User.Claims.First(c => c.Type == "AuthId").Value);
+
+        await CargarUsuario();
+        await CargarCitas();
+    }
+
+    protected async Task CargarUsuario()
+    {
+        var respuesta = await manager.Get<Usuario>($"AdminUsuarios/{usuarioId}").ConfigureAwait(false);
+
+        if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+        {
+            usuario = respuesta.Datos;
+            usuario.SintomasDelPaciente = new SintomasDelPaciente();
+            usuario.Cita = new Tbl_Citas() { FechaCita = DateTime.Now };
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+            Console.WriteLine(respuesta.Datos);
+        }
+    }
+
+    private async Task CargarCitas()
+    {
+        var respuesta = await manager.Get<List<Tbl_Citas>>($"api/Citas/{usuarioId}").ConfigureAwait(false);
+
+        if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+        {
+            Citas = respuesta.Datos;
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+            Console.WriteLine(respuesta.Datos);
+        }
+    }
+
+    private async Task BuscarDoctores()
+    {
+        var respuesta = await manager.Post<string, List<Usuario>>("Medicos/CargarDoctores", "").ConfigureAwait(false);
+
+        if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+        {
+            Doctores = respuesta.Datos;
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+            Console.WriteLine(respuesta.Datos);
+        }
+    }
+
+
+    void SeleccionFechaInicioCita(ChangeEventArgs e)
+    {
+        var HoraCitaSeleccionadaString = e.Value.ToString();
+
+        if (HoraCitaSeleccionadaString == "0")
+        {
+            return;
+        }
+        else
+        {
+            usuario.Cita.HoraInicio = TimeSpan.Parse(HoraCitaSeleccionadaString);
+            usuario.Cita.HoraFin = usuario.Cita.HoraInicio + new TimeSpan(01, 00, 00);
+        }
+
+    }
+
+    public async Task GuardarCita(Usuario doctor)
+    {
+        usuario.Cita.PacienteId = usuario.UsuarioId;
+        usuario.Cita.DoctorId = doctor.UsuarioId;
+        usuario.Cita.DoctorNombre = doctor.Nombre;
+        usuario.Cita.PacienteNombre = usuario.Nombre;
+        usuario.Cita.NumeroTelefonoDoctor = doctor.Telefono;
+        usuario.Cita.NumeroTelefonoPaciente = usuario.Telefono;
+        usuario.Cita.Estatus = "Pendiente";
+
+        usuario.SintomasDelPaciente.UsuarioId = usuario.UsuarioId;
+
+        var respuesta = await manager.Post<Usuario, long>("api/Citas/GuardarCita", usuario);
+
+        if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+        {
+            Citas.Add(usuario.Cita);
+
+            usuario.SintomasDelPaciente = new SintomasDelPaciente();
+            usuario.Cita = new Tbl_Citas();
+
+            NuevaCita = false;
+
+            await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+        }
+        else if (respuesta.Estatus == EstadosDeRespuesta.Error)
+        {
+            Console.WriteLine(respuesta.Mensaje);
+        }
+        else if (respuesta.Estatus == EstadosDeRespuesta.NoProceso)
+        {
+            Console.WriteLine("Peticion no procesada.");
+        }
+
+    }
+
+    public async Task VerificarCitasExistentes(Usuario doctor)
+    {
+        var consulta = new ConsultaCitas() { UsuarioId = doctor.UsuarioId, Fecha = usuario.Cita.FechaCita };
+
+        var respuesta = await manager.Post<ConsultaCitas, List<ConsultasPorMedico>>("api/Citas/ObtenerCitasDisponibles", consulta);
+
+        if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+        {
+            Doctores.First(x => x.UsuarioId == doctor.UsuarioId).HorariosDeConsulta = respuesta.Datos;
+            //StateHasChanged()
+            await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+        }
+        else if (respuesta.Estatus == EstadosDeRespuesta.Error)
+        {
+            Console.WriteLine(respuesta.Mensaje);
+        }
+        else if (respuesta.Estatus == EstadosDeRespuesta.NoProceso)
+        {
+            Console.WriteLine("Peticion no procesada.");
+        }
+    }
+}

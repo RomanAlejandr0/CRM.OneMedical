@@ -1,0 +1,83 @@
+﻿@*@page "/citasComponent"
+
+@using System.Net.Http
+@inject HttpClient Http
+@inject IManager manager
+@inject IJSRuntime js
+@inject NavigationManager navigator
+
+@if (Cargando)
+{
+    <RadzenText Text="Procesando, espere por favor..." />
+}
+else
+{
+    <RadzenTemplateForm TItem="Tbl_Citas" Data="@cita" Submit="@Submit">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <RadzenFieldset Text="Registro de Cita">
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Descripcion" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenTextBox style="width: 100%;" Name="Descripcion" @bind-Value="@cita.Descripcion" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">
+                                <RadzenLabel Text="Fecha de Cita" />
+                            </div>
+                            <div class="col-md-8">
+                                <RadzenDatePicker style="width: 100%;" Name="FechaCita" @bind-Value="cita.FechaCitaInicio" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 align-items-center d-flex">*@
+                                @*<RadzenLabel Text="Cardholder" />*@
+                           @* </div>
+                            <div class="col-md-8">*@
+                                @*<RadzenTextBox style="width: 100%;" Name="CardHolder" />*@
+                         @*   </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2">
+                                <RadzenButton ButtonType="Radzen.ButtonType.Submit">Guardar</RadzenButton>
+                            </div>
+                        </div>
+                    </RadzenFieldset>
+                </div>
+            </div>
+
+        </div>
+    </RadzenTemplateForm>
+}*@
+
+
+@code {
+    //Tbl_Citas cita = new Tbl_Citas { HoraInicio = DateTime.Now., Estatus = "Pendiente" };
+
+    //bool Cargando = false;
+
+    //private async Task Submit(Tbl_Citas arg)
+    //{
+    //    Cargando = true;
+    //    await Task.Delay(1);
+    //    var respuesta = await manager.Post<Tbl_Citas, string>("api/Citas", arg).ConfigureAwait(false);
+
+    //    if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+    //    {
+    //        cita = new Tbl_Citas { FechaCitaInicio = DateTime.Now, Estatus = "Pendiente" };
+    //        await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+    //    }
+    //    else
+    //    {
+    //        await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+    //        Console.WriteLine(respuesta.Datos);
+    //    }
+    //    Cargando = false;
+    //    await Task.Delay(1);
+    //    StateHasChanged();
+    //}
+}

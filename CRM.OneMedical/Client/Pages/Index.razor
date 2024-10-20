@@ -1,0 +1,19 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+
+<p>No tienes ninguna cuenta</p>
+<a href="/registro"><RadzenButton Text="Registro" ButtonStyle="ButtonStyle.Primary" /></a>
+
+<p>Ya tienes una cuenta</p>
+<a href="/login"><RadzenButton Text="Inciar Sesion" ButtonStyle="ButtonStyle.Primary" /></a>
+
+@*<CitasComponent />*@
+
+@code{
+    void Saludar()
+    {
+        Console.WriteLine("Hola mundo");
+    }
+}

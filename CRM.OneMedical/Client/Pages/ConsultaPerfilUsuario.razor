@@ -1,0 +1,114 @@
+﻿@page "/perfil"
+
+@inject IManager manager
+@inject NavigationManager navigate
+@inject AuthenticationStateProvider auth
+@inject IJSRuntime js
+
+@attribute [Authorize(Roles = "Perfil")]
+
+<h5 class="border-start border-2 ps-1">Perfil</h5>
+
+@if (DataCargada == false)
+{
+    <text>Cargando informacion...</text>
+}
+else
+{
+    <FormRegistroUsuarios @bind-Usuario="usuario" />
+
+    <div class="row mt-4">
+        <div class="col-4">
+            <CapturaDomicilio Domicilio="@domicilio" CodigoPostal="@domicilio.CodigoPostal" @bind-Procesando="procesando" />
+        </div>
+
+
+        @if (usuario.Perfil == (short)PerfilesUsuarios.Medico)
+        {
+            <div class="col-8">
+                <CapturaJornadaLaboral UsuarioId="usuarioId" configuracionConsulta="configuracionConsulta" ConsultasPorMedico="consultasPorMedico" />
+            </div>
+        }
+
+    </div>
+}
+
+@code {
+    public bool DataCargada = new bool();
+
+    private long usuarioId = new long();
+    private Usuario usuario = new Usuario() { InformacionAdicionalDelPaciente = new InformacionAdicionalDelPaciente() };
+    private ConfiguracionConsulta configuracionConsulta = new ConfiguracionConsulta();
+    private List<ConsultasPorMedico> consultasPorMedico = new List<ConsultasPorMedico>();
+
+    public Domicilio domicilio { get; set; } = new Domicilio();
+    private bool procesando = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        DataCargada = false;
+
+        usuarioId = long.Parse((await auth.GetAuthenticationStateAsync()).User.Claims.First(c => c.Type == "AuthId").Value);
+
+        await CargarUsuario();
+
+        if (usuario.Perfil == (short)PerfilesUsuarios.Paciente)
+        {
+            await CargarInformacionAdicionalPaciente();
+        }
+
+        if (usuario.Perfil == (short)PerfilesUsuarios.Medico)
+        {
+            await CargarConfiguracionJornadaLaboral();
+        }
+
+        DataCargada = true;
+    }
+
+    protected async Task CargarUsuario()
+    {
+        var respuesta = await manager.Get<Usuario>($"AdminUsuarios/{usuarioId}").ConfigureAwait(false);
+
+        if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+        {
+            usuario = respuesta.Datos;
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+            Console.WriteLine(respuesta.Datos);
+        }
+    }
+
+    protected async Task CargarInformacionAdicionalPaciente()
+    {
+        var respuesta = await manager.Get<InformacionAdicionalDelPaciente>($"Pacientes/CargarInformacionAdicionalPaciente/{usuarioId}").ConfigureAwait(false);
+
+        if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+        {
+            usuario.InformacionAdicionalDelPaciente = respuesta.Datos;
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+            Console.WriteLine(respuesta.Datos);
+        }
+    }
+
+    protected async Task CargarConfiguracionJornadaLaboral()
+    {
+        var respuesta = await manager.Get<ConfiguracionConsulta>($"Medicos/CargarConfiguracionConsulta/{usuarioId}").ConfigureAwait(false);
+
+        if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+        {
+            configuracionConsulta = respuesta.Datos;
+            consultasPorMedico = configuracionConsulta.HorariosDeConsulta;
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", respuesta.Mensaje);
+            Console.WriteLine(respuesta.Datos);
+        }
+    }
+}

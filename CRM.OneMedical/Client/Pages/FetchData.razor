@@ -1,0 +1,47 @@
+﻿@page "/fetchdata"
+@using CRM.OneMedical.Shared
+@inject IManager manager
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Citas Medicas</h1>
+
+<p>Registro de citas medicas.</p>
+
+@if (citas == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Detalle</th>
+                <th>Fecha</th>
+                <th>Estatus</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in citas)
+            {
+                <tr>
+                    <td>@forecast.Descripcion</td>
+                    <td>@forecast.Fecha</td>
+                    <td>@forecast.Estatus</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Tbl_Citas>? citas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var respuesta = await manager.Get<List<Tbl_Citas>>("api/Citas").ConfigureAwait(false);
+
+        citas = respuesta.Datos;
+    }
+}

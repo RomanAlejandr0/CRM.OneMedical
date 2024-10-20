@@ -1,0 +1,96 @@
+﻿@using Radzen.Blazor
+
+@inject ILoginService loginService
+@inject NavigationManager navigate
+
+@inherits LayoutComponentBase
+
+
+
+<RadzenLayout class="rz-shadow-3" style="height: 800px">
+    <RadzenHeader>
+        <div class="d-flex align-items-center">
+            <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
+            <RadzenLabel Text="Header" />
+        </div>
+    </RadzenHeader>
+    <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
+        <RadzenPanelMenu>
+            @*<RadzenPanelMenuItem Text="Home" Icon="home" Path="counter" />
+            <RadzenPanelMenuItem Text="Users" Icon="account_box" Path="index" />*@
+            <AuthorizeView Roles="Perfil">
+                <Authorized>
+                    <div>
+                        <NavLink class="nav-link" href="perfil" Match="NavLinkMatch.All">
+                            <span class="oi oi-person" aria-hidden="true"></span> Perfil
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+        </RadzenPanelMenu>
+        <AuthorizeView Roles="Consultas">
+            <Authorized>
+                <div>
+                    <NavLink class="nav-link" href="consultas">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Consultas
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="AdmistrarUsuarios">
+            <Authorized>
+                <div>
+                    <NavLink class="nav-link" href="administrarDoctores">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Doctores
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <div class="p-2">
+            GRMV
+        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <button class="btn btn-primary" @onclick="Logout">Salir</button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </RadzenSidebar>
+    <RadzenBody>
+        <div class="p-2">
+            @Body
+        </div>
+    </RadzenBody>
+    @*<RadzenFooter>
+    Footer
+    </RadzenFooter>*@
+</RadzenLayout>
+
+
+@*<div class="page">
+    <div class="sidebar">
+
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+
+        </article>
+    </main>
+</div>*@
+
+@code {
+    bool sidebar1Expanded = true;
+
+    private async Task Logout()
+    {
+        await loginService.Logout();
+        var Tarea = Task.Run(() => navigate.NavigateTo("/"));
+        await Tarea;
+    }
+}

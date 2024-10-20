@@ -1,0 +1,181 @@
+﻿@inject IManager manager
+@inject NavigationManager navigate
+@inject IJSRuntime js
+
+<RadzenTemplateForm TItem="Usuario" Data="@Usuario" Submit="GuardarUsuario">
+    <RadzenFieldset Text="Informacion sobre el Usuario">
+
+        <div class="row">
+            <div class="col-md-4">
+                <RadzenLabel Text="Nombre" />
+                <RadzenTextBox style="width: 100%;" @bind-Value="@Usuario.Nombre" Name="Nombre" />
+                <RadzenRequiredValidator Component="Nombre" Text="El Nombre es requerido!" Popup="true" />
+            </div>
+
+            <div class="col-md-4">
+                <RadzenLabel Text="Apellidos" />
+                <RadzenTextBox style="width: 100%;" @bind-Value="@Usuario.Apellidos" Name="ApellidoP" />
+                <RadzenRequiredValidator Component="ApellidoP" Text="El Apellido es requerido!" Popup="true" />
+            </div>
+
+            <div class="col-md-4">
+                <RadzenLabel Text="Telefono" />
+                <RadzenTextBox style="width: 100%;" @bind-Value="@Usuario.Telefono" Name="Telefono" />
+                <RadzenRequiredValidator Component="Telefono" Text="El Numero de Telefono es requerido!" Popup="true" />
+            </div>
+        </div>
+
+        <br />
+
+        @if (Usuario.Perfil == (short)PerfilesUsuarios.Paciente)
+        {
+            <div class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Nacionalidad" />
+                    <RadzenTextBox style="width: 100%;" @bind-Value="@(Usuario.InformacionAdicionalDelPaciente.Nacionalidad)" Name="Nacionalidad" />
+                    <RadzenRequiredValidator Component="Nacionalidad" Text="La Nacionalidad es requerida!" Popup="true" />
+                </div>
+
+                <div class="col-md-3">
+                    <RadzenLabel Text="Edad" />
+                    <RadzenNumeric style="width: 100%;" @bind-Value="@(Usuario.InformacionAdicionalDelPaciente.Edad)" Name="Edad" />
+                    <RadzenRequiredValidator Component="Edad" Text="La Edad es requerida!" Popup="true" />
+                </div>
+
+                <div class="col-md-3">
+                    <RadzenLabel Text="Genero" />
+                    <RadzenTextBox style="width: 100%;" @bind-Value="@(Usuario.InformacionAdicionalDelPaciente.Genero)" Name="Genero" />
+                    <RadzenRequiredValidator Component="Genero" Text="El Genero es requerido!" Popup="true" />
+                </div>
+
+                <div class="col-md-3">
+                    <RadzenLabel Text="EstadoCivil" />
+                    <RadzenTextBox style="width: 100%;" @bind-Value="@(Usuario.InformacionAdicionalDelPaciente.EstadoCivil)" Name="EstadoCivil" />
+                    <RadzenRequiredValidator Component="EstadoCivil" Text="El Estado Civil es requerido!" Popup="true" />
+                </div>
+            </div>
+
+            <br />
+
+            <div class="row">
+                <div class="col-md-3">
+                    <RadzenLabel Text="Ocupacion" />
+                    <RadzenTextBox style="width: 100%;" @bind-Value="@(Usuario.InformacionAdicionalDelPaciente.Ocupacion)" Name="Ocupacion" />
+                    <RadzenRequiredValidator Component="Ocupacion" Text="La Ocupacion es requerida!" Popup="true" />
+
+                </div>
+
+                <div class="col-md-3">
+                    <RadzenLabel Text="Habitos De Vida" />
+                    <RadzenTextBox style="width: 100%;" @bind-Value="@(Usuario.InformacionAdicionalDelPaciente.HabitosDeVida)" Name="HabitosDeVida" />
+                    <RadzenRequiredValidator Component="HabitosDeVida" Text="Los Habitos de Vida son requeridos!" Popup="true" />
+
+                </div>
+
+                <div class="col-md-3">
+                    <RadzenLabel Text="Numero Hijos" />
+                    <RadzenNumeric style="width: 100%;" @bind-Value="@(Usuario.InformacionAdicionalDelPaciente.NumeroDeHijos)" Name="NumeroDeHijos" />
+                    <RadzenRequiredValidator Component="NumeroDeHijos" Text="El Numero de Hijos es requerido!" Popup="true" />
+                </div>
+
+                <div class="col-md-3">
+                    <RadzenLabel Text="Motivo De Consulta" />
+                    <RadzenTextBox style="width: 100%;" @bind-Value="@(Usuario.InformacionAdicionalDelPaciente.MotivoDeConsulta)" Name="MotivoDeConsulta" />
+                    <RadzenRequiredValidator Component="MotivoDeConsulta" Text="El Motivo de consulta es requerido!" Popup="true" />
+                </div>
+            </div>
+
+            <br />
+        }
+
+        <div class="row">
+            <div class="col-md-1 align-items-center d-flex">
+                <RadzenLabel Text="Correo" />
+            </div>
+            <div class="col-md-3">
+                <RadzenTextBox style="width: 100%;" @bind-Value="@Usuario.EMail" Name="CorreoElectronico" />
+                <RadzenRequiredValidator Component="CorreoElectronico" Text="El Correo Electronico es requerido!" Popup="true" />
+                @*<RadzenRequiredValidator Component="CorreoElectronico" Text="Correo con formato Incorrecto!" Popup="true" />*@
+            </div>
+
+            <div class="col-md-1 align-items-center d-flex">
+                <RadzenLabel Text="Contraseña" />
+            </div>
+            <div class="col-md-3">
+                <RadzenPassword style="width: 100%;" @bind-Value="@Usuario.Password" Name="Password" />
+                <RadzenRequiredValidator Component="Password" Text="La Contraseña es requerida!" Popup="true" />
+                @*<RadzenRequiredValidator Component="Password" Text="Contraseña No Segura!" Popup="true" />*@
+            </div>
+
+            <div class="col-md-2">
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Registrarse" class="w-100"/>
+            </div>
+
+            <div class="col-md-2">
+                <RadzenButton ButtonType="ButtonType.Button" Text="Cancelar" class="w-100" />
+            </div>
+        </div>
+    </RadzenFieldset>    
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public EventCallback<Respuesta<long>> OnGuardar { get; set; }
+
+    [Parameter] public bool EsRegistroPacientes { get; set; }
+
+    private Usuario _usuario = new Usuario();
+
+    [Parameter]
+    public Usuario Usuario
+    {
+        get
+        {
+            return _usuario;
+        }
+        set
+        {
+            if (_usuario != value)
+            {
+                _usuario = value;
+                if (UsuarioChanged.HasDelegate)
+                {
+                    UsuarioChanged.InvokeAsync(value);
+                }
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<Usuario> UsuarioChanged { get; set; }
+
+    public async Task GuardarUsuario()
+    {
+        var respuesta = await manager.Post<Usuario, long>("AdminUsuarios/Guardar", Usuario);
+        
+        if (respuesta.Estatus == EstadosDeRespuesta.Correcto)
+        {
+            if (Usuario.UsuarioId != respuesta.Datos)
+            {
+                Usuario.UsuarioId = respuesta.Datos;
+                await UsuarioChanged.InvokeAsync(_usuario);
+            }
+
+            if (EsRegistroPacientes)
+            {
+                navigate.NavigateTo("/login");
+            }
+        }
+
+        else if (respuesta.Estatus == EstadosDeRespuesta.Error)
+        {
+            Console.WriteLine(respuesta.Mensaje);
+        }
+        
+        else if (respuesta.Estatus == EstadosDeRespuesta.NoProceso)
+        {
+            Console.WriteLine("Peticion no procesada.");
+        }
+
+        await OnGuardar.InvokeAsync(respuesta);
+    }
+}
